@@ -1,45 +1,50 @@
-package main
+package disgover
 
 import (
 	"github.com/golang/groupcache/lru"
 	"github.com/libp2p/go-libp2p-kbucket"
 )
 
+type Endpoint struct {
+	Host string
+	Port int64
+}
+
 type Contact struct {
 	Id       string
+	Endpoint Endpoint
 	Data     interface{}
-	Endpoint interface{}
-
-	vectorClock int64
 }
 
-type Query struct {
-	done            bool
-	nodeId          string
-	index           int64
-	ongoingRequests int64
-	closest         *Contact
-	nodes           []*Contact
-	nodesMap        map[string]*Contact
-	sender          *Contact
-	newNodes        []*Contact
-	listener
+type DisgoverRpc struct {
+	Request string
+	NodeId  string
 }
-type QueryCallback func(err error, contact *Contact)
-type NodeFoundListener func(err error, contact *Contact, nodeId string, response)
+
+// Transport
+// ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~
+type DisgoverRpcDelegate func(data []byte) (result []byte, err error)
 
 type ITransport interface {
-	findNode(contact *Contact, nodeId string, sender *Contact)
+	ExecRPC(destination *Contact, rpc DisgoverRpc) []byte
+	OnPeerRPC(delegate DisgoverRpcDelegate)
+
+	Listen()
 }
+
+// Disgover
+// ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~
 type Disgover struct {
-	InlineTrace bool
-	Seeds       []*Contact
-	Transport   ITransport
+	Contact   *Contact
+	Transport ITransport
 
-	lruCache     *lru.Cache
-	buckets      map[string]*Contact
-	routingTable *kbucket.RoutingTable
+	lruCache *lru.Cache
+	nodes    map[string]*Contact
+	kdht     *kbucket.RoutingTable
+}
 
-	CONCURRENCY_CONSTANT int64
-	maxCacheSize         int64
+type IDisgover interface {
+	Run()
+
+	Find(nodeId string, sender *Contact) (contact *Contact, err error)
 }
