@@ -33,7 +33,10 @@ func (transport *HTTPTransport) ExecRPC(destination *disgover.Contact, rpc disgo
 	rpcAsBytes, err := json.Marshal(rpc)
 
 	url := fmt.Sprintf("http://%s:%d/disgover", destination.Endpoint.Host, destination.Endpoint.Port)
-	fmt.Println("ExecRpc(): ", url)
+
+	fmt.Println("TRACE: ExecRPC()")
+	fmt.Println("       URL-> ", url)
+	fmt.Println("   Payload-> ", string(rpcAsBytes[:]))
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(rpcAsBytes))
 	req.Header.Set("Content-Type", "application/json")
@@ -41,24 +44,13 @@ func (transport *HTTPTransport) ExecRPC(destination *disgover.Contact, rpc disgo
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("ExecRpc(): " + err.Error())
+		fmt.Println("ERROR: ExecRPC(): " + err.Error())
 		return nil
 	}
-	//defer resp.Body.Close()
-
-	// fmt.Println("ExecRpc(): response Status:", resp.Status)
-	// fmt.Println("ExecRpc(): response Headers:", resp.Header)
-	//
-	// fmt.Println("ExecRpc(): response Body:", string(body))
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
 	return body
-	// if delegate != nil {
-	// 	var jsonData Servers.JsonData
-	// 	_ = json.NewDecoder(resp.Body).Decode(&jsonData)
-	// 	delegate(jsonData)
-	// }
 }
 
 // OnPeerRPC -

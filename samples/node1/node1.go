@@ -1,11 +1,13 @@
 package main
 
 import (
-	"bufio"
-	"os"
+ 	"os"
 
 	"github.com/dispatchlabs/disgover"
 	"github.com/dispatchlabs/disgover/transport"
+	"os/signal"
+	"syscall"
+	"fmt"
 )
 
 func main() {
@@ -23,5 +25,15 @@ func main() {
 	)
 	disgover.Run()
 
-	bufio.NewReader(os.Stdin).ReadString('\n')
+
+	sigs := make(chan os.Signal, 1)
+	done := make(chan bool, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-sigs
+		fmt.Println()
+		fmt.Println(sig)
+		done <- true
+	}()
+	<-done
 }

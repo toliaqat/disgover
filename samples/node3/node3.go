@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -10,13 +11,10 @@ import (
 )
 
 func main() {
-	var thisID = "333333333333333333333333333"
-	var port int64 = 9003
-
 	var contact = disgover.Contact{
-		Id: thisID,
+		Id: "333333333333333333333333333",
 		Endpoint: disgover.Endpoint{
-			Port: port,
+			Port: 9003,
 		},
 	}
 
@@ -36,7 +34,11 @@ func main() {
 	disgover.Run()
 
 	node2, _ := disgover.Find("222222222222222222222222222", disgover.Contact)
-	fmt.Println(node2)
+
+	node2AsBytes, _ := json.Marshal(node2)
+
+	fmt.Println("DISGOVER: Find()")
+	fmt.Println("         ", string(node2AsBytes[:]))
 
 	bufio.NewReader(os.Stdin).ReadString('\n')
 }

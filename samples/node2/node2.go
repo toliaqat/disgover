@@ -9,13 +9,10 @@ import (
 )
 
 func main() {
-	var thisID = "222222222222222222222222222"
-	var port int64 = 9002
-
 	var contact = disgover.Contact{
-		Id: thisID,
+		Id: "222222222222222222222222222",
 		Endpoint: disgover.Endpoint{
-			Port: port,
+			Port: 9002,
 		},
 	}
 

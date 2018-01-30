@@ -18,7 +18,7 @@ type Contact struct {
 
 type DisgoverRpc struct {
 	Request string
-	NodeId  string
+	Contact Contact
 }
 
 // Transport
