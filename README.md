@@ -44,5 +44,5 @@ type Contact struct {
 
 
 # Samples
-![](nodes.png)
+![](nodes.png "")
 
