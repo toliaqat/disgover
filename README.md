@@ -41,3 +41,8 @@ type Contact struct {
 - `Id` - node ID
 - `Endpoint` - where the node can be contacted
 - `Data` - any additional paypload needed for extended functionalities and queries
+
+
+# Samples
+![](nodes.png)
+
