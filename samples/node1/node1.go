@@ -1,13 +1,14 @@
 package main
 
 import (
- 	"os"
+	"os"
+
+	"fmt"
+	"os/signal"
+	"syscall"
 
 	"github.com/dispatchlabs/disgover"
 	"github.com/dispatchlabs/disgover/transport"
-	"os/signal"
-	"syscall"
-	"fmt"
 )
 
 func main() {
@@ -24,7 +25,6 @@ func main() {
 		transport.NewHTTPTransport(node1.Endpoint),
 	)
 	disgover.Run()
-
 
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)

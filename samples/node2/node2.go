@@ -1,8 +1,10 @@
 package main
 
 import (
-	"bufio"
+	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/dispatchlabs/disgover"
 	"github.com/dispatchlabs/disgover/transport"
@@ -22,7 +24,7 @@ func main() {
 			&disgover.Contact{
 				Id: "111111111111111111111111111",
 				Endpoint: disgover.Endpoint{
-					Host: "localhost",
+					Host: "172.17.0.5",
 					Port: 9001,
 				},
 			},
@@ -31,5 +33,14 @@ func main() {
 	)
 	disgover.Run()
 
-	bufio.NewReader(os.Stdin).ReadString('\n')
+	sigs := make(chan os.Signal, 1)
+	done := make(chan bool, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-sigs
+		fmt.Println()
+		fmt.Println(sig)
+		done <- true
+	}()
+	<-done
 }
