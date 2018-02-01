@@ -6,16 +6,32 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
+	"net"
 	"github.com/dispatchlabs/disgover"
 	"github.com/dispatchlabs/disgover/transport"
 )
 
 func main() {
+
+	name, err := os.Hostname()
+	if err != nil {
+		fmt.Printf("Oops: %v\n", err)
+		return
+	}
+
+	addrs, err := net.LookupHost(name)
+	if err != nil {
+		fmt.Printf("Oops: %v\n", err)
+		return
+	}
+	fmt.Printf("Local IP: %s\n", addrs[0])
+
+
 	var contact = disgover.Contact{
 		Id: "333333333333333333333333333",
 		Endpoint: disgover.Endpoint{
-			Port: 9003,
+			Port: 9001,
+			Host: addrs[0],
 		},
 	}
 

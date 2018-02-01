@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-
 	"github.com/nic0lae/JerryMouse/Servers"
-
 	"github.com/dispatchlabs/disgover"
 )
 

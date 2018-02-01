@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-
+	"net"
 	"fmt"
 	"os/signal"
 	"syscall"
@@ -12,10 +12,24 @@ import (
 )
 
 func main() {
+	name, err := os.Hostname()
+	if err != nil {
+		fmt.Printf("Oops: %v\n", err)
+		return
+	}
+
+	addrs, err := net.LookupHost(name)
+	if err != nil {
+		fmt.Printf("Oops: %v\n", err)
+		return
+	}
+	fmt.Printf("Local IP: %s\n", addrs[0])
+
 	var node1 = disgover.Contact{
 		Id: "111111111111111111111111111",
 		Endpoint: disgover.Endpoint{
 			Port: 9001,
+			Host: addrs[0],
 		},
 	}
 
