@@ -23,7 +23,7 @@ imageId=$(cat docker-output | grep 'Successfully built ' | sed "s/Successfully b
 rm docker-output
 docker tag $imageId localhost:5000/disgover:$imageTag
 docker push localhost:5000/disgover:$imageTag
-kubectl run disgover-$imageTag --image=localhost:5000/disgover:$imageTag --port=9001 --image-pull-policy=Never
+kubectl run disgover-$imageTag --image=localhost:5000/disgover:$imageTag --port=1975 --image-pull-policy=Never
 sleep 30s
 seedNodeIP=$(kubectl describe pod disgover-node1 | grep -e IP | sed "s/IP://g" | sed 's/ //g')
 echo SeedNodeIP is $seedNodeIP
@@ -41,7 +41,7 @@ imageId=$(cat docker-output | grep 'Successfully built ' | sed "s/Successfully b
 rm docker-output
 docker tag $imageId localhost:5000/disgover:$imageTag
 docker push localhost:5000/disgover:$imageTag
-kubectl run disgover-$imageTag --image=localhost:5000/disgover:$imageTag --port=9001 --image-pull-policy=Never --env="SEED_NODE_IP=$seedNodeIP"
+kubectl run disgover-$imageTag --image=localhost:5000/disgover:$imageTag --port=1975 --image-pull-policy=Never --env="SEED_NODE_IP=$seedNodeIP"
 
 echo
 echo
@@ -55,7 +55,7 @@ imageId=$(cat docker-output | grep 'Successfully built ' | sed "s/Successfully b
 rm docker-output
 docker tag $imageId localhost:5000/disgover:$imageTag
 docker push localhost:5000/disgover:$imageTag
-kubectl run disgover-$imageTag --image=localhost:5000/disgover:$imageTag --port=9001 --image-pull-policy=Never --env="SEED_NODE_IP=$seedNodeIP"
+kubectl run disgover-$imageTag --image=localhost:5000/disgover:$imageTag --port=1975 --image-pull-policy=Never --env="SEED_NODE_IP=$seedNodeIP"
 
 echo
 echo

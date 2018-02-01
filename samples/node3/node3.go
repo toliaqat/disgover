@@ -25,7 +25,7 @@ func main() {
 				Id: "111111111111111111111111111",
 				Endpoint: &disgover.Endpoint{
 					Host: seedNodeIP,
-					Port: 9001,
+					Port: 1975,
 				},
 			},
 		},
