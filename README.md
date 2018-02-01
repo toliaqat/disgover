@@ -1,3 +1,18 @@
+# WARNING WARNING WARNING WARNING
+__Drop this from from your `/etc/resolv.conf`__
+```shell
+search attlocal.net
+nameserver 192.168.7.254
+```
+
+__Use this instead__
+```shell
+nameserver 8.8.8.8
+```
+
+ATT just suck with resolving, takes 5 min to resolve dev stuff and build docker images, per image
+
+
 # Run the nodes in Kubernetes
 - `eval $(minikube docker-env)`
 - Node 1

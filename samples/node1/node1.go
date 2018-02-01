@@ -1,44 +1,25 @@
 package main
 
 import (
-	"os"
-	"net"
 	"fmt"
+	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/dispatchlabs/disgover"
-	"github.com/dispatchlabs/disgover/transport"
 )
 
 func main() {
-	name, err := os.Hostname()
-	if err != nil {
-		fmt.Printf("Oops: %v\n", err)
-		return
-	}
+	var thisNode = disgover.NewContact()
+	thisNode.Id = "111111111111111111111111111"
+	// thisNode.Endpoint.Host = ""
+	// thisNode.Endpoint.Port = 9001
 
-	addrs, err := net.LookupHost(name)
-	if err != nil {
-		fmt.Printf("Oops: %v\n", err)
-		return
-	}
-	fmt.Printf("Local IP: %s\n", addrs[0])
-
-	var node1 = disgover.Contact{
-		Id: "111111111111111111111111111",
-		Endpoint: disgover.Endpoint{
-			Port: 9001,
-			Host: addrs[0],
-		},
-	}
-
-	var disgover *disgover.Disgover = disgover.NewDisgover(
-		&node1,
+	var dsg *disgover.Disgover = disgover.NewDisgover(
+		thisNode,
 		[]*disgover.Contact{},
-		transport.NewHTTPTransport(node1.Endpoint),
 	)
-	disgover.Run()
+	dsg.Run()
 
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)

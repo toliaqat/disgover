@@ -5,48 +5,32 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"net"
+
 	"github.com/dispatchlabs/disgover"
-	"github.com/dispatchlabs/disgover/transport"
 )
 
 func main() {
+	var seedNodeIP = os.Getenv("SEED_NODE_IP")
+	fmt.Printf("SEED_NODE_IP: %s\n", seedNodeIP)
 
-	name, err := os.Hostname()
-	if err != nil {
-		fmt.Printf("Oops: %v\n", err)
-		return
-	}
+	var thisNode = disgover.NewContact()
+	thisNode.Id = "222222222222222222222222222"
+	// thisNode.Endpoint.Host = ""
+	// thisNode.Endpoint.Port = 9002
 
-	addrs, err := net.LookupHost(name)
-	if err != nil {
-		fmt.Printf("Oops: %v\n", err)
-		return
-	}
-	fmt.Printf("Local IP: %s\n", addrs[0])
-
-	var contact = disgover.Contact{
-		Id: "222222222222222222222222222",
-		Endpoint: disgover.Endpoint{
-			Port: 9001,
-			Host: addrs[0],
-		},
-	}
-
-	var disgover *disgover.Disgover = disgover.NewDisgover(
-		&contact,
+	var dsg *disgover.Disgover = disgover.NewDisgover(
+		thisNode,
 		[]*disgover.Contact{
 			&disgover.Contact{
 				Id: "111111111111111111111111111",
-				Endpoint: disgover.Endpoint{
-					Host: "172.17.0.5",
+				Endpoint: &disgover.Endpoint{
+					Host: seedNodeIP,
 					Port: 9001,
 				},
 			},
 		},
-		transport.NewHTTPTransport(contact.Endpoint),
 	)
-	disgover.Run()
+	dsg.Run()
 
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
