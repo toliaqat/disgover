@@ -5,9 +5,10 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"net"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/golang/groupcache/lru"
 	kbucket "github.com/libp2p/go-libp2p-kbucket"
@@ -18,7 +19,7 @@ import (
 
 type Disgover struct {
 	ThisContact *Contact
-	Nodes    map[string]*Contact
+	Nodes       map[string]*Contact
 
 	lruCache *lru.Cache
 	kdht     *kbucket.RoutingTable
@@ -31,13 +32,19 @@ type IDisgover interface {
 	Find(contactId string, sender *Contact) (*Contact, error)
 }
 
+var DisgoverSingleton *Disgover = nil
+
+func GetDisgover() *Disgover {
+	return DisgoverSingleton
+}
+
 func NewDisgover(thisContact *Contact, seed []*Contact) *Disgover {
 	seedNodes := map[string]*Contact{}
 	for _, peer := range seed {
 		seedNodes[peer.Id] = peer
 	}
 
-	disgover := &Disgover{
+	DisgoverSingleton := &Disgover{
 		ThisContact: thisContact,
 
 		lruCache: lru.New(0),
@@ -50,13 +57,13 @@ func NewDisgover(thisContact *Contact, seed []*Contact) *Disgover {
 		),
 	}
 
-	disgover.addOrUpdate(thisContact)
+	DisgoverSingleton.addOrUpdate(thisContact)
 
 	for _, contact := range seed {
-		disgover.addOrUpdate(contact)
+		DisgoverSingleton.addOrUpdate(contact)
 	}
 
-	return disgover
+	return DisgoverSingleton
 }
 
 func (disgover *Disgover) Run() {
