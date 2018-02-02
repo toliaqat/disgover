@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net"
 	"os"
 
@@ -18,9 +18,9 @@ import (
 
 type Disgover struct {
 	ThisContact *Contact
+	Nodes    map[string]*Contact
 
 	lruCache *lru.Cache
-	nodes    map[string]*Contact
 	kdht     *kbucket.RoutingTable
 }
 
@@ -41,7 +41,7 @@ func NewDisgover(thisContact *Contact, seed []*Contact) *Disgover {
 		ThisContact: thisContact,
 
 		lruCache: lru.New(0),
-		nodes:    seedNodes,
+		Nodes:    seedNodes,
 		kdht: kbucket.NewRoutingTable(
 			1000,
 			kbucket.ConvertPeerID(peer.ID(thisContact.Id)),
@@ -83,6 +83,10 @@ func (disgover *Disgover) Go() {
 		disgover.ThisContact.Endpoint.Port,
 	))
 
+	log.WithFields(log.Fields{
+		"method": "Disgover.Go",
+	}).Info("running...")
+
 	disgover.pingSeedList()
 }
 
@@ -102,7 +106,7 @@ func (disgover *Disgover) PeerFind(ctx context.Context, findRequest *FindRequest
 func (disgover *Disgover) Find(contactId string, sender *Contact) (*Contact, error) {
 	fmt.Println(fmt.Sprintf("TRACE: Find(): %s", contactId))
 
-	if contact, ok := disgover.nodes[contactId]; ok {
+	if contact, ok := disgover.Nodes[contactId]; ok {
 		return contact, nil
 	}
 
@@ -112,7 +116,7 @@ func (disgover *Disgover) Find(contactId string, sender *Contact) (*Contact, err
 func (disgover *Disgover) findViaPeers(nodeID string, sender *Contact) (*Contact, error) {
 	fmt.Println(fmt.Sprintf("TRACE: findViaPeers(): %s", nodeID))
 
-	peerIDs := disgover.kdht.NearestPeers([]byte(disgover.ThisContact.Id), len(disgover.nodes))
+	peerIDs := disgover.kdht.NearestPeers([]byte(disgover.ThisContact.Id), len(disgover.Nodes))
 
 	for _, peerID := range peerIDs {
 		peerIDAsString := string(peerID)
@@ -120,7 +124,7 @@ func (disgover *Disgover) findViaPeers(nodeID string, sender *Contact) (*Contact
 			continue
 		}
 
-		contact := disgover.nodes[peerIDAsString]
+		contact := disgover.Nodes[peerIDAsString]
 
 		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", contact.Endpoint.Host, contact.Endpoint.Port), grpc.WithInsecure())
 		if err != nil {
@@ -147,14 +151,14 @@ func (disgover *Disgover) findViaPeers(nodeID string, sender *Contact) (*Contact
 }
 
 func (disgover *Disgover) addOrUpdate(contact *Contact) {
-	disgover.nodes[contact.Id] = contact
+	disgover.Nodes[contact.Id] = contact
 	disgover.kdht.Update(peer.ID(contact.Id))
 }
 
 func (disgover *Disgover) pingSeedList() {
 	fmt.Println(fmt.Sprintf("TRACE: pingSeedList()"))
 
-	peerIDs := disgover.kdht.NearestPeers([]byte(disgover.ThisContact.Id), len(disgover.nodes))
+	peerIDs := disgover.kdht.NearestPeers([]byte(disgover.ThisContact.Id), len(disgover.Nodes))
 
 	for _, peerID := range peerIDs {
 		peerIDAsString := string(peerID)
@@ -162,7 +166,7 @@ func (disgover *Disgover) pingSeedList() {
 			continue
 		}
 
-		contact := disgover.nodes[peerIDAsString]
+		contact := disgover.Nodes[peerIDAsString]
 
 		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", contact.Endpoint.Host, contact.Endpoint.Port), grpc.WithInsecure())
 		if err != nil {

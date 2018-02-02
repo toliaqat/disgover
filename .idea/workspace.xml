@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bd7b7d3a-29ca-4292-ac05-68d80c784246" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/disgover.go" afterPath="$PROJECT_DIR$/disgover.go" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -239,15 +239,16 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1517526899983</updated>
-      <workItem from="1517526901321" duration="4032000" />
+      <workItem from="1517526901321" duration="4509000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="4032000" />
+    <option name="totallyTimeSpent" value="4509000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="737" y="23" width="1761" height="1210" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
