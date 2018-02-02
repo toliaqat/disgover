@@ -10,15 +10,12 @@ import (
 )
 
 func main() {
-	var thisNode = disgover.NewContact()
-	thisNode.Id = "111111111111111111111111111"
-	// thisNode.Endpoint.Host = ""
-	// thisNode.Endpoint.Port = 9001
-
-	var dsg *disgover.Disgover = disgover.NewDisgover(
-		thisNode,
+	var dsg = disgover.NewDisgover(
+		disgover.NewContact(),
 		[]*disgover.Contact{},
 	)
+	// dsg.ThisContact.Id = "NODE-1"
+	dsg.ThisContact.Endpoint.Port = 9001
 	dsg.Run()
 
 	sigs := make(chan os.Signal, 1)

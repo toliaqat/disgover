@@ -2,6 +2,8 @@ package disgover
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net"
@@ -71,10 +73,16 @@ func (disgover *Disgover) RunOnExisting(listener net.Listener) {
 	RegisterDisgoverRPCServer(server, disgover)
 	go server.Serve(listener)
 
-	disgover.pingSeedList()
+	disgover.Go()
 }
 
 func (disgover *Disgover) Go() {
+	fmt.Println(fmt.Sprintf("TRACE: Disgover[%s @ %s:%d]",
+		disgover.ThisContact.Id,
+		disgover.ThisContact.Endpoint.Host,
+		disgover.ThisContact.Endpoint.Port,
+	))
+
 	disgover.pingSeedList()
 }
 
@@ -167,13 +175,11 @@ func (disgover *Disgover) pingSeedList() {
 }
 
 func NewContact() *Contact {
-	//data := make([]byte, 160)
-	//rand.Read(data)
+	data := make([]byte, 10)
+	rand.Read(data)
 
 	return &Contact{
-		// TODO: Fix this! MAO!
-		//Id: uuid.New().String(),
-		Id: "111111111111111111111111111",
+		Id: base64.StdEncoding.EncodeToString(data),
 		Endpoint: &Endpoint{
 			Port: 1975,
 			Host: getLocalIP(),

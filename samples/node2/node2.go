@@ -10,26 +10,26 @@ import (
 )
 
 func main() {
-	var seedNodeIP = os.Getenv("SEED_NODE_IP")
+	var seedNodeIP = os.Getenv("SEED_NODE_IP") // Needed when run from Kubernetes
+	if len(seedNodeIP) == 0 {
+		seedNodeIP = "127.0.0.1"
+	}
 	fmt.Printf("SEED_NODE_IP: %s\n", seedNodeIP)
 
-	var thisNode = disgover.NewContact()
-	thisNode.Id = "222222222222222222222222222"
-	// thisNode.Endpoint.Host = ""
-	// thisNode.Endpoint.Port = 9002
-
-	var dsg *disgover.Disgover = disgover.NewDisgover(
-		thisNode,
+	var dsg = disgover.NewDisgover(
+		disgover.NewContact(),
 		[]*disgover.Contact{
 			&disgover.Contact{
-				Id: "111111111111111111111111111",
+				// Id: "NODE-1",
 				Endpoint: &disgover.Endpoint{
 					Host: seedNodeIP,
-					Port: 1975,
+					Port: 9001,
 				},
 			},
 		},
 	)
+	dsg.ThisContact.Id = "NODE-2"
+	dsg.ThisContact.Endpoint.Port = 9002
 	dsg.Run()
 
 	sigs := make(chan os.Signal, 1)

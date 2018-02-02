@@ -10,35 +10,34 @@ import (
 )
 
 func main() {
-	var seedNodeIP = os.Getenv("SEED_NODE_IP")
+	var seedNodeIP = os.Getenv("SEED_NODE_IP") // Needed when run from Kubernetes
+	if len(seedNodeIP) == 0 {
+		seedNodeIP = "127.0.0.1"
+	}
 	fmt.Printf("SEED_NODE_IP: %s\n", seedNodeIP)
 
-	var thisNode = disgover.NewContact()
-	thisNode.Id = "333333333333333333333333333"
-	// thisNode.Endpoint.Host = ""
-	// thisNode.Endpoint.Port = 9003
-
-	var dsg *disgover.Disgover = disgover.NewDisgover(
-		thisNode,
+	var dsg = disgover.NewDisgover(
+		disgover.NewContact(),
 		[]*disgover.Contact{
 			&disgover.Contact{
-				Id: "111111111111111111111111111",
+				// Id: "NODE-1",
 				Endpoint: &disgover.Endpoint{
 					Host: seedNodeIP,
-					Port: 1975,
+					Port: 9001,
 				},
 			},
 		},
 	)
+	dsg.ThisContact.Id = "NODE-3"
+	dsg.ThisContact.Endpoint.Port = 9003
 	dsg.Run()
 
-	node2, _ := dsg.Find("222222222222222222222222222", thisNode)
+	node2, _ := dsg.Find("NODE-2", dsg.ThisContact)
 
-	fmt.Println("DISGOVER: Find()")
 	if node2 == nil {
-		fmt.Println("          NOT FOUND")
+		fmt.Println("DISGOVER: Find() -> NOT FOUND")
 	} else {
-		fmt.Println(fmt.Sprintf("          %s, on [%s : %d]", node2.Id, node2.Endpoint.Host, node2.Endpoint.Port))
+		fmt.Println(fmt.Sprintf("DISGOVER: Find() -> %s on [%s : %d]", node2.Id, node2.Endpoint.Host, node2.Endpoint.Port))
 	}
 
 	sigs := make(chan os.Signal, 1)
