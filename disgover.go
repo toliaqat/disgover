@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net"
-	"os"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 
@@ -34,8 +34,12 @@ type IDisgover interface {
 
 var DisgoverSingleton *Disgover = nil
 
-func GetDisgover() *Disgover {
+func GetInstance() *Disgover {
 	return DisgoverSingleton
+}
+
+func SetInstance(disgover *Disgover) {
+	DisgoverSingleton = disgover
 }
 
 func NewDisgover(thisContact *Contact, seed []*Contact) *Disgover {
@@ -84,7 +88,7 @@ func (disgover *Disgover) RunOnExisting(listener net.Listener) {
 }
 
 func (disgover *Disgover) Go() {
-	fmt.Println(fmt.Sprintf("TRACE: Disgover[%s @ %s:%d]",
+	fmt.Println(fmt.Sprintf("Disgover-TRACE: Disgover[%s @ %s:%d]",
 		disgover.ThisContact.Id,
 		disgover.ThisContact.Endpoint.Host,
 		disgover.ThisContact.Endpoint.Port,
@@ -98,20 +102,20 @@ func (disgover *Disgover) Go() {
 }
 
 func (disgover *Disgover) PeerPing(ctx context.Context, contact *Contact) (*Empty, error) {
-	fmt.Println(fmt.Sprintf("TRACE: PeerPing(): %s", contact.Id))
+	fmt.Println(fmt.Sprintf("Disgover-TRACE: PeerPing(): %s", contact.Id))
 
 	disgover.addOrUpdate(contact)
 	return &Empty{}, nil
 }
 
 func (disgover *Disgover) PeerFind(ctx context.Context, findRequest *FindRequest) (*Contact, error) {
-	fmt.Println(fmt.Sprintf("TRACE: PeerFind(): %s", findRequest.ContactId))
+	fmt.Println(fmt.Sprintf("Disgover-TRACE: PeerFind(): %s", findRequest.ContactId))
 
 	return disgover.Find(findRequest.ContactId, findRequest.Sender)
 }
 
 func (disgover *Disgover) Find(contactId string, sender *Contact) (*Contact, error) {
-	fmt.Println(fmt.Sprintf("TRACE: Find(): %s", contactId))
+	fmt.Println(fmt.Sprintf("Disgover-TRACE: Find(): %s", contactId))
 
 	if contact, ok := disgover.Nodes[contactId]; ok {
 		return contact, nil
@@ -121,7 +125,7 @@ func (disgover *Disgover) Find(contactId string, sender *Contact) (*Contact, err
 }
 
 func (disgover *Disgover) findViaPeers(nodeID string, sender *Contact) (*Contact, error) {
-	fmt.Println(fmt.Sprintf("TRACE: findViaPeers(): %s", nodeID))
+	fmt.Println(fmt.Sprintf("Disgover-TRACE: findViaPeers(): %s", nodeID))
 
 	peerIDs := disgover.kdht.NearestPeers([]byte(disgover.ThisContact.Id), len(disgover.Nodes))
 
@@ -144,7 +148,7 @@ func (disgover *Disgover) findViaPeers(nodeID string, sender *Contact) (*Contact
 			Sender:    sender,
 		})
 
-		fmt.Println("TRACE: findViaPeers() RESULT")
+		fmt.Println("Disgover-TRACE: findViaPeers() RESULT")
 		if respose != nil {
 			fmt.Println(fmt.Sprintf("       %s, on [%s : %d]", respose.Id, respose.Endpoint.Host, respose.Endpoint.Port))
 			disgover.addOrUpdate(contact)
@@ -163,7 +167,7 @@ func (disgover *Disgover) addOrUpdate(contact *Contact) {
 }
 
 func (disgover *Disgover) pingSeedList() {
-	fmt.Println(fmt.Sprintf("TRACE: pingSeedList()"))
+	fmt.Println(fmt.Sprintf("Disgover-TRACE: pingSeedList()"))
 
 	peerIDs := disgover.kdht.NearestPeers([]byte(disgover.ThisContact.Id), len(disgover.Nodes))
 
@@ -199,18 +203,54 @@ func NewContact() *Contact {
 }
 
 func getLocalIP() string {
-	name, err := os.Hostname()
-	if err != nil {
-		fmt.Printf("Oops: %v\n", err)
-		return ""
+	return strings.Join(getLocalIPList(), ",")
+}
+
+func getLocalIPList() []string {
+	var ipList = []string{}
+
+	ifaces, _ := net.Interfaces()
+	for _, i := range ifaces {
+		addrs, _ := i.Addrs()
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+
+			var ipAddress = ip.String()
+
+			// var isUnspecified = ip.IsUnspecified()
+			// var isLoopback = ip.IsLoopback()
+			// var isMulticast = ip.IsMulticast()
+			// var isInterfaceLocalMulticast = ip.IsInterfaceLocalMulticast()
+			// var isLinkLocalMulticast = ip.IsLinkLocalMulticast()
+			// var isLinkLocalUnicast = ip.IsLinkLocalUnicast()
+			// var isGlobalUnicast = ip.IsGlobalUnicast()
+
+			if ip.IsGlobalUnicast() {
+				ipList = append(ipList, ipAddress)
+			}
+		}
 	}
 
-	addrs, err := net.LookupHost(name)
-	if err != nil {
-		fmt.Printf("Oops: %v\n", err)
-		return ""
-	}
-	fmt.Printf("Local IP: %s\n", addrs[0])
+	return ipList
 
-	return addrs[0]
+	// name, err := os.Hostname()
+	// if err != nil {
+	// 	fmt.Printf("Oops: %v\n", err)
+	// 	return ""
+	// }
+
+	// addrs, err := net.LookupHost(name)
+	// if err != nil {
+	// 	fmt.Printf("Oops: %v\n", err)
+	// 	return ""
+	// }
+	// fmt.Printf("Local IP: %s\n", addrs[0])
+
+	// return addrs[0]
 }
