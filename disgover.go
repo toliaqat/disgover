@@ -15,6 +15,7 @@ import (
 	peer "github.com/libp2p/go-libp2p-peer"
 	peerstore "github.com/libp2p/go-libp2p-peerstore"
 	"google.golang.org/grpc"
+	grpcPeer "google.golang.org/grpc/peer"
 )
 
 type Disgover struct {
@@ -103,6 +104,17 @@ func (disgover *Disgover) Go() {
 
 func (disgover *Disgover) PeerPing(ctx context.Context, contact *Contact) (*Empty, error) {
 	fmt.Println(fmt.Sprintf("Disgover-TRACE: PeerPing(): %s", contact.Id))
+
+	thePeer, ok := grpcPeer.FromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("Disgover-TRACE: failed to get peer from ctx")
+	}
+	if thePeer.Addr == net.Addr(nil) {
+		return nil, fmt.Errorf("Disgover-TRACE: failed to get peer address")
+	} else {
+		var peerAddressWithPort = thePeer.Addr.String()
+		contact.Endpoint.Host = peerAddressWithPort[0:strings.Index(peerAddressWithPort, ":")]
+	}
 
 	disgover.addOrUpdate(contact)
 	return &Empty{}, nil
