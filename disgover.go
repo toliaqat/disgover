@@ -103,8 +103,6 @@ func (disgover *Disgover) Go() {
 }
 
 func (disgover *Disgover) PeerPing(ctx context.Context, contact *Contact) (*Empty, error) {
-	fmt.Println(fmt.Sprintf("Disgover-TRACE: PeerPing(): %s", contact.Id))
-
 	thePeer, ok := grpcPeer.FromContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("Disgover-TRACE: failed to get peer from ctx")
@@ -115,6 +113,12 @@ func (disgover *Disgover) PeerPing(ctx context.Context, contact *Contact) (*Empt
 		var peerAddressWithPort = thePeer.Addr.String()
 		contact.Endpoint.Host = peerAddressWithPort[0:strings.Index(peerAddressWithPort, ":")]
 	}
+
+	fmt.Println(fmt.Sprintf("Disgover-TRACE: PeerPing(): %s @ [%s : %d]",
+		contact.Id,
+		contact.Endpoint.Host,
+		contact.Endpoint.Port,
+	))
 
 	disgover.addOrUpdate(contact)
 	return &Empty{}, nil
