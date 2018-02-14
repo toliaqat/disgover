@@ -1,3 +1,7 @@
+# Build
+- `protoc --go_out=plugins=grpc:. *.proto`
+
+
 # WARNING
 __Use a fast DNS__
 ```shell

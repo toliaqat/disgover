@@ -49,7 +49,7 @@ func NewDisgover(thisContact *Contact, seed []*Contact) *Disgover {
 		seedNodes[peer.Id] = peer
 	}
 
-	DisgoverSingleton := &Disgover{
+	disgoverInstance := &Disgover{
 		ThisContact: thisContact,
 
 		lruCache: lru.New(0),
@@ -62,13 +62,13 @@ func NewDisgover(thisContact *Contact, seed []*Contact) *Disgover {
 		),
 	}
 
-	DisgoverSingleton.addOrUpdate(thisContact)
+	disgoverInstance.addOrUpdate(thisContact)
 
 	for _, contact := range seed {
-		DisgoverSingleton.addOrUpdate(contact)
+		disgoverInstance.addOrUpdate(contact)
 	}
 
-	return DisgoverSingleton
+	return disgoverInstance
 }
 
 func (disgover *Disgover) Run() {
@@ -102,17 +102,17 @@ func (disgover *Disgover) Go() {
 	disgover.pingSeedList()
 }
 
-func (disgover *Disgover) PeerPing(ctx context.Context, contact *Contact) (*Empty, error) {
+func (disgover *Disgover) PeerPing(ctx context.Context, contact *Contact) (*Contact, error) {
 	thePeer, ok := grpcPeer.FromContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("Disgover-TRACE: failed to get peer from ctx")
 	}
 	if thePeer.Addr == net.Addr(nil) {
 		return nil, fmt.Errorf("Disgover-TRACE: failed to get peer address")
-	} else {
-		var peerAddressWithPort = thePeer.Addr.String()
-		contact.Endpoint.Host = peerAddressWithPort[0:strings.Index(peerAddressWithPort, ":")]
 	}
+
+	var peerAddressWithPort = thePeer.Addr.String()
+	contact.Endpoint.Host = peerAddressWithPort[0:strings.Index(peerAddressWithPort, ":")]
 
 	fmt.Println(fmt.Sprintf("Disgover-TRACE: PeerPing(): %s @ [%s : %d]",
 		contact.Id,
@@ -121,7 +121,7 @@ func (disgover *Disgover) PeerPing(ctx context.Context, contact *Contact) (*Empt
 	))
 
 	disgover.addOrUpdate(contact)
-	return &Empty{}, nil
+	return disgover.ThisContact, nil
 }
 
 func (disgover *Disgover) PeerFind(ctx context.Context, findRequest *FindRequest) (*Contact, error) {
@@ -185,15 +185,13 @@ func (disgover *Disgover) addOrUpdate(contact *Contact) {
 func (disgover *Disgover) pingSeedList() {
 	fmt.Println(fmt.Sprintf("Disgover-TRACE: pingSeedList()"))
 
-	peerIDs := disgover.kdht.NearestPeers([]byte(disgover.ThisContact.Id), len(disgover.Nodes))
+	// peerIDs := disgover.kdht.NearestPeers([]byte(disgover.ThisContact.Id), len(disgover.Nodes))
+	// contact := disgover.Nodes[peerID]
 
-	for _, peerID := range peerIDs {
-		peerIDAsString := string(peerID)
-		if peerIDAsString == disgover.ThisContact.Id {
+	for peerID, contact := range disgover.Nodes {
+		if peerID == disgover.ThisContact.Id {
 			continue
 		}
-
-		contact := disgover.Nodes[peerIDAsString]
 
 		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", contact.Endpoint.Host, contact.Endpoint.Port), grpc.WithInsecure())
 		if err != nil {
@@ -201,7 +199,12 @@ func (disgover *Disgover) pingSeedList() {
 		}
 
 		client := NewDisgoverRPCClient(conn)
-		client.PeerPing(context.Background(), disgover.ThisContact)
+		seedNode, err := client.PeerPing(context.Background(), disgover.ThisContact)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("Disgover-TRACE-ERROR: pingSeedList() -> %s", err))
+		} else {
+			disgover.Nodes[peerID].Id = seedNode.Id
+		}
 	}
 }
 

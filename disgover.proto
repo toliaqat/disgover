@@ -20,6 +20,6 @@ message FindRequest {
 message Empty {}
 
 service DisgoverRPC {
-	rpc PeerPing(Contact) returns (Empty) {}
+	rpc PeerPing(Contact) returns (Contact) {}
 	rpc PeerFind(FindRequest) returns (Contact) {}
 }
