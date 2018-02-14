@@ -1,16 +1,10 @@
-# WARNING WARNING WARNING WARNING
-__Drop this from from your `/etc/resolv.conf`__
+# WARNING
+__Use a fast DNS__
 ```shell
-search attlocal.net
-nameserver 192.168.7.254
-```
-
-__Use this instead__
-```shell
+nano /etc/resolv.conf
 nameserver 8.8.8.8
 ```
-
-ATT just suck with resolving, takes 5 min to resolve dev stuff and build docker images, per image
+With a slow DNS it takes 5 min to resolve dev stuff and build docker images, per image
 
 
 # Run the nodes in Kubernetes
