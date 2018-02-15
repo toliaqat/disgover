@@ -1,6 +1,10 @@
 # Build
 - `protoc --go_out=plugins=grpc:. *.proto`
 
+# Protobuf Setup
+- Install [protoc](https://github.com/google/protobuf/releases) compiler manually or by homebrew `$ brew install protobuf`
+- Install `protoc-gen-go plugin`: `go get -u github.com/golang/protobuf/protoc-gen-go`
+- Build Go bindings from `.proto` file. `protoc --go_out=plugins=grpc:. proto/disgover.proto`
 
 # WARNING
 __Use a fast DNS__
