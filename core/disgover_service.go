@@ -24,7 +24,7 @@ func NewDisGoverService() *DisGoverService {
 func (disGoverService *DisGoverService) Init() {
 	log.WithFields(log.Fields{
 		"method": "DisGoverService.Init",
-	}).Info("init...")
+	}).Info("initializing...")
 }
 
 // Name
