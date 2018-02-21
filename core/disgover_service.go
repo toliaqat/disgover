@@ -6,6 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"github.com/dispatchlabs/disgover/proto"
+	"github.com/dispatchlabs/disgo_commons/services"
 )
 
 // DisGoverService
@@ -15,9 +16,9 @@ type DisGoverService struct {
 
 // NewDisGoverService
 func NewDisGoverService() *DisGoverService {
-	return &DisGoverService{
-		running: false,
-	}
+	disGoverService := DisGoverService{false}
+	proto.RegisterDisGoverGrpcServer(services.GetGrpcServer(), &disGoverService)
+	return &disGoverService
 }
 
 // Init
@@ -35,11 +36,6 @@ func (disGoverService *DisGoverService) Name() string {
 // IsRunning
 func (disGoverService *DisGoverService) IsRunning() bool {
 	return disGoverService.running
-}
-
-// Register
-func (disGoverService *DisGoverService) RegisterGrpc(grpcServer *grpc.Server) {
-	proto.RegisterDisGoverGrpcServer(grpcServer, disGoverService)
 }
 
 // Go
