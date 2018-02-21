@@ -3,8 +3,6 @@ package core
 import (
 	"sync"
 	"context"
-	log "github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
 	"github.com/dispatchlabs/disgover/proto"
 	"github.com/dispatchlabs/disgo_commons/services"
 )
@@ -19,13 +17,6 @@ func NewDisGoverService() *DisGoverService {
 	disGoverService := DisGoverService{false}
 	proto.RegisterDisGoverGrpcServer(services.GetGrpcServer(), &disGoverService)
 	return &disGoverService
-}
-
-// Init
-func (disGoverService *DisGoverService) Init() {
-	log.WithFields(log.Fields{
-		"method": "DisGoverService.Init",
-	}).Info("initializing...")
 }
 
 // Name
