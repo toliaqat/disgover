@@ -6,17 +6,18 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/dispatchlabs/disgover"
+	//"github.com/dispatchlabs/disgover"
+	//proto "github.com/dispatchlabs/disgover/proto"
 )
 
 func main() {
-	var dsg = disgover.NewDisgover(
-		disgover.NewContact(),
-		[]*disgover.Contact{},
-	)
-	// dsg.ThisContact.Id = "NODE-1"
-	dsg.ThisContact.Endpoint.Port = 9001
-	dsg.Run()
+	//var dsg = disgover.NewDisgover(
+	//	disgover.NewContact(),
+	//	[]*proto.Contact{},
+	//)
+	//// dsg.ThisContact.Id = "NODE-1"
+	//dsg.ThisContact.Endpoint.Port = 9001
+	//dsg.Run()
 
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)

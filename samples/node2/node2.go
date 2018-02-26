@@ -5,8 +5,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/dispatchlabs/disgover"
+	//"github.com/dispatchlabs/disgover"
+	//"github.com/dispatchlabs/disgover/proto"
 )
 
 func main() {
@@ -16,21 +16,21 @@ func main() {
 	}
 	fmt.Printf("SEED_NODE_IP: %s\n", seedNodeIP)
 
-	var dsg = disgover.NewDisgover(
-		disgover.NewContact(),
-		[]*disgover.Contact{
-			&disgover.Contact{
-				// Id: "NODE-1",
-				Endpoint: &disgover.Endpoint{
-					Host: seedNodeIP,
-					Port: 9001,
-				},
-			},
-		},
-	)
-	dsg.ThisContact.Id = "NODE-2"
-	dsg.ThisContact.Endpoint.Port = 9002
-	dsg.Run()
+	//var dsg = disgover.NewDisgover(
+	//	disgover.NewContact(),
+	//	[]*proto.Contact{
+	//		&proto.Contact{
+	//			// Id: "NODE-1",
+	//			Endpoint: &proto.Endpoint{
+	//				Host: seedNodeIP,
+	//				Port: 9001,
+	//			},
+	//		},
+	//	},
+	//)
+	//dsg.ThisContact.Id = "NODE-2"
+	//dsg.ThisContact.Endpoint.Port = 9002
+	//dsg.Run()
 
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)

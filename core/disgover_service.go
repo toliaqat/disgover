@@ -2,9 +2,6 @@ package core
 
 import (
 	"sync"
-	"context"
-	"github.com/dispatchlabs/disgover/proto"
-	"github.com/dispatchlabs/disgo_commons/services"
 )
 
 // DisGoverService
@@ -15,7 +12,6 @@ type DisGoverService struct {
 // NewDisGoverService
 func NewDisGoverService() *DisGoverService {
 	disGoverService := DisGoverService{false}
-	proto.RegisterDisGoverGrpcServer(services.GetGrpcServer(), &disGoverService)
 	return &disGoverService
 }
 
@@ -34,12 +30,7 @@ func (disGoverService *DisGoverService) Go(waitGroup *sync.WaitGroup) {
 	disGoverService.running = true
 }
 
-// PeerPing
-func (disGoverService *DisGoverService) PeerPing(context.Context, *proto.Contact) (*proto.Contact, error) {
-	return nil, nil
-}
-
-// PeerFind
-func (disGoverService *DisGoverService) PeerFind(context.Context, *proto.FindRequest) (*proto.Contact, error) {
-	return nil, nil
+func (disGoverService *DisGoverService) WithGrpc() *DisGoverService {
+	disGoverService.RegisterGrpc()
+	return disGoverService
 }

@@ -5,9 +5,12 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"github.com/dispatchlabs/disgo_commons/types"
+	"github.com/dispatchlabs/disgover/core"
+	"github.com/dispatchlabs/disgo_commons/services"
+	)
 
-	"github.com/dispatchlabs/disgover"
-)
+var serviceList   []types.IService
 
 func main() {
 	var seedNodeIP = os.Getenv("SEED_NODE_IP") // Needed when run from Kubernetes
@@ -16,29 +19,29 @@ func main() {
 	}
 	fmt.Printf("SEED_NODE_IP: %s\n", seedNodeIP)
 
-	var dsg = disgover.NewDisgover(
-		disgover.NewContact(),
-		[]*disgover.Contact{
-			&disgover.Contact{
-				// Id: "NODE-1",
-				Endpoint: &disgover.Endpoint{
-					Host: seedNodeIP,
-					Port: 9001,
-				},
-			},
-		},
-	)
-	dsg.ThisContact.Id = "NODE-3"
-	dsg.ThisContact.Endpoint.Port = 9003
-	dsg.Run()
+	//var dsg = core.NewDisgover(
+	//	types.NewContact(),
+	//	[]*types.Contact{
+	//		&types.Contact{
+	//			// Id: "NODE-1",
+	//			Endpoint: &types.Endpoint{
+	//				Host: seedNodeIP,
+	//				Port: 9001,
+	//			},
+	//		},
+	//	},
+	//)
+	serviceList = append(serviceList, core.NewDisGoverService().WithGrpc())
+	serviceList = append(serviceList, services.NewGrpcService())
 
-	node2, _ := dsg.Find("NODE-2", dsg.ThisContact)
 
-	if node2 == nil {
-		fmt.Println("DISGOVER: Find() -> NOT FOUND")
-	} else {
-		fmt.Println(fmt.Sprintf("DISGOVER: Find() -> %s on [%s : %d]", node2.Id, node2.Endpoint.Host, node2.Endpoint.Port))
-	}
+	//node2, _ := dsg.Find("NODE-2", dsg.ThisContact)
+	//
+	//if node2 == nil {
+	//	fmt.Println("DISGOVER: Find() -> NOT FOUND")
+	//} else {
+	//	fmt.Println(fmt.Sprintf("DISGOVER: Find() -> %s on [%s : %d]", node2.Id, node2.Endpoint.Host, node2.Endpoint.Port))
+	//}
 
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
