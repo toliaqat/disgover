@@ -1,4 +1,4 @@
-package core
+package disgover
 
 import (
 	"sync"

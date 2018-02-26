@@ -1,4 +1,4 @@
-package core
+package disgover
 
 import (
 	"fmt"
@@ -37,6 +37,22 @@ func (disGoverService *DisGoverService) PeerFindGrpc(ctx context.Context, findRe
 	}
 	return convertToProto(foundContact), nil
 }
+
+// PeerFind
+func (disGoverService *DisGoverService) PeerFindAll(ctx context.Context, empty *proto.Empty) (*proto.ContactList, error) {
+	fmt.Println(fmt.Sprintf("Disgover-TRACE: PeerAll()\n"))
+
+	contacts, err := disGoverService.FindAll()
+	if err != nil {
+		return nil, err
+	}
+	resp := new(proto.ContactList)
+	for _, c := range *contacts{
+		resp.Id = append(resp.Id, convertToProto(&c))
+	}
+	return resp, nil
+}
+
 
 func FindPeerWithGrpcClient(idTofind string, contact *types.Contact) *types.Contact {
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", contact.Endpoint.Host, contact.Endpoint.Port), grpc.WithInsecure())

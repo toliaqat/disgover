@@ -1,4 +1,4 @@
-package core
+package disgover
 
 import (
 	"github.com/dispatchlabs/disgo_commons/types"
@@ -80,6 +80,18 @@ func (disGoverService *DisGoverService) Find(contactId string, sender *types.Con
 		return contact, nil
 	}
 	return disgover.findViaPeers(contactId, sender)
+}
+
+func (disGoverService *DisGoverService) FindAll() (*[]types.Contact, error) {
+	fmt.Println(fmt.Sprintf("Disgover-TRACE: Find(): %s"))
+	peerIDs := disgover.kdht.NearestPeers([]byte(disgover.ThisContact.Address), len(disgover.Nodes))
+	contacts := make([]types.Contact, 0)
+	for _, peerID := range peerIDs {
+		peerIDAsString := string(peerID)
+		contact := disgover.Nodes[peerIDAsString]
+		contacts = append(contacts, *contact)
+	}
+	return &contacts, nil
 }
 
 func (disGoverService *DisGoverService) PeerFind(idToFind string, contact *types.Contact) (*types.Contact, error) {

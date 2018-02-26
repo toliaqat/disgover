@@ -12,6 +12,10 @@ message Contact {
 	Endpoint 	Endpoint = 2;
 }
 
+message ContactList {
+	repeated Contact 	Id = 1;
+}
+
 message FindRequest {
 	bytes 	ContactId = 1;
 	Contact Sender = 2;
@@ -22,4 +26,5 @@ message Empty {}
 service DisgoverRPC {
 	rpc PeerPingGrpc(Contact) returns (Contact) {}
 	rpc PeerFindGrpc(FindRequest) returns (Contact) {}
+	rpc PeerFindAll(Empty) returns (ContactList) {}
 }
