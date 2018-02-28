@@ -47,7 +47,7 @@ func (disGoverService *DisGoverService) PeerFindAll(ctx context.Context, empty *
 		return nil, err
 	}
 	resp := new(proto.ContactList)
-	for _, c := range *contacts{
+	for _, c := range *contacts {
 		resp.Id = append(resp.Id, convertToProto(&c))
 	}
 	return resp, nil

@@ -24,6 +24,7 @@ type Disgover struct {
 func getDisgover() *Disgover {
 	once.Do(func() {
 		disgover = NewDisgover(types.NewContact(), []*types.Contact{})
+		disgover.addOrUpdate(disgover.ThisContact)
 	})
 	return disgover
 }
@@ -56,39 +57,39 @@ func NewDisgover(thisContact *types.Contact, seed []*types.Contact) *Disgover {
 
 func (disgover *Disgover) addOrUpdate(contact *types.Contact) {
 	id := contact.Address
-	disgover.Nodes[id] = contact
-	disgover.kdht.Update(peer.ID(id))
+	getDisgover().Nodes[id] = contact
+	getDisgover().kdht.Update(peer.ID(id))
 }
 
 func (disgover *Disgover) pingSeedList() {
 	fmt.Println(fmt.Sprintf("Disgover-TRACE: pingSeedList()"))
 
-	for peerID, contact := range disgover.Nodes {
-		if peerID == disgover.ThisContact.Address {
+	for peerID, contact := range getDisgover().Nodes {
+		if peerID == getDisgover().ThisContact.Address {
 			continue
 		}
-		seedNode := PeerPingWithGrpcClient(contact, disgover.ThisContact)
-		disgover.Nodes[peerID].Address = seedNode.Address
-		disgover.addOrUpdate(seedNode)
+		seedNode := PeerPingWithGrpcClient(contact, getDisgover().ThisContact)
+		getDisgover().Nodes[peerID].Address = seedNode.Address
+		getDisgover().addOrUpdate(seedNode)
 	}
 }
 
 func (disGoverService *DisGoverService) Find(contactId string, sender *types.Contact) (*types.Contact, error) {
 	fmt.Println(fmt.Sprintf("Disgover-TRACE: Find(): %s", contactId))
 
-	if contact, ok := disgover.Nodes[contactId]; ok {
+	if contact, ok := getDisgover().Nodes[contactId]; ok {
 		return contact, nil
 	}
-	return disgover.findViaPeers(contactId, sender)
+	return getDisgover().findViaPeers(contactId, sender)
 }
 
 func (disGoverService *DisGoverService) FindAll() (*[]types.Contact, error) {
-	fmt.Println(fmt.Sprintf("Disgover-TRACE: Find(): %s"))
-	peerIDs := disgover.kdht.NearestPeers([]byte(disgover.ThisContact.Address), len(disgover.Nodes))
+	fmt.Println(fmt.Sprintf("Disgover-TRACE: FindAll()"))
+	peerIDs := getDisgover().kdht.NearestPeers([]byte(getDisgover().ThisContact.Address), len(getDisgover().Nodes))
 	contacts := make([]types.Contact, 0)
 	for _, peerID := range peerIDs {
 		peerIDAsString := string(peerID)
-		contact := disgover.Nodes[peerIDAsString]
+		contact := getDisgover().Nodes[peerIDAsString]
 		contacts = append(contacts, *contact)
 	}
 	return &contacts, nil
@@ -97,30 +98,30 @@ func (disGoverService *DisGoverService) FindAll() (*[]types.Contact, error) {
 func (disGoverService *DisGoverService) PeerFind(idToFind string, contact *types.Contact) (*types.Contact, error) {
 	fmt.Println(fmt.Sprintf("Disgover-TRACE: PeerFind(): %s", contact.Address))
 
-	if contact, ok := disgover.Nodes[contact.Address]; ok {
+	if contact, ok := getDisgover().Nodes[contact.Address]; ok {
 		return contact, nil
 	}
-	return disgover.findViaPeers(contact.Address, contact)
+	return getDisgover().findViaPeers(contact.Address, contact)
 }
 
 func (disgover *Disgover) findViaPeers(idToFind string, sender *types.Contact) (*types.Contact, error) {
 	fmt.Println(fmt.Sprintf("Disgover-TRACE: findViaPeers(): %s", idToFind))
 
-	peerIDs := disgover.kdht.NearestPeers([]byte(disgover.ThisContact.Address), len(disgover.Nodes))
+	peerIDs := getDisgover().kdht.NearestPeers([]byte(getDisgover().ThisContact.Address), len(getDisgover().Nodes))
 
 	for _, peerID := range peerIDs {
 		peerIDAsString := string(peerID)
-		if peerIDAsString == disgover.ThisContact.Address {
+		if peerIDAsString == getDisgover().ThisContact.Address {
 			continue
 		}
 
-		contact := disgover.Nodes[peerIDAsString]
+		contact := getDisgover().Nodes[peerIDAsString]
 		respose := FindPeerWithGrpcClient(idToFind, sender)
 
 		if respose != nil {
 			fmt.Println(fmt.Sprintf(" %s, on [%s : %d]", respose.Address, respose.Endpoint.Host, respose.Endpoint.Port))
 
-			disgover.addOrUpdate(contact)
+			getDisgover().addOrUpdate(contact)
 			return respose, nil
 		} else {
 			fmt.Println("       NOT FOUND")
