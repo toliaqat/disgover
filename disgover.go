@@ -176,13 +176,11 @@ func (disgover *Disgover) PeerPing(ctx context.Context, contact *Contact) (*Cont
 }
 
 func (disgover *Disgover) PeerFind(ctx context.Context, findRequest *FindRequest) (*Contact, error) {
-	fmt.Println(fmt.Sprintf("Disgover-TRACE: PeerFind(): %s", findRequest.ContactId))
-
 	return disgover.Find(findRequest.ContactId, findRequest.Sender)
 }
 
 func (disgover *Disgover) Find(contactId string, sender *Contact) (*Contact, error) {
-	fmt.Println(fmt.Sprintf("Disgover-TRACE: Find(): %s", contactId))
+	fmt.Println(fmt.Sprintf("Disgover-TRACE: Find(): %s in %s by %s", contactId, disgover.ThisContact.Id, sender.Id))
 
 	if contact, ok := disgover.Nodes[contactId]; ok {
 		return contact, nil
@@ -192,13 +190,15 @@ func (disgover *Disgover) Find(contactId string, sender *Contact) (*Contact, err
 }
 
 func (disgover *Disgover) findViaPeers(nodeID string, sender *Contact) (*Contact, error) {
-	fmt.Println(fmt.Sprintf("Disgover-TRACE: findViaPeers(): %s", nodeID))
-
 	peerIDs := disgover.kdht.NearestPeers([]byte(disgover.ThisContact.Id), len(disgover.Nodes))
 
 	for _, peerID := range peerIDs {
 		peerIDAsString := string(peerID)
 		if peerIDAsString == disgover.ThisContact.Id {
+			continue
+		}
+
+		if peerIDAsString == sender.Id {
 			continue
 		}
 

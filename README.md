@@ -1,12 +1,17 @@
 # Build
 - `protoc --go_out=plugins=grpc:. *.proto`
 
+# Test
+- `go test`
+
 # Protobuf Setup
 - Install [protoc](https://github.com/google/protobuf/releases) compiler manually or by homebrew `$ brew install protobuf`
 - Install `protoc-gen-go plugin`: `go get -u github.com/golang/protobuf/protoc-gen-go`
 - Build Go bindings from `.proto` file. `protoc --go_out=plugins=grpc:. proto/disgover.proto`
 
-# WARNING
+# Run the nodes in Kubernetes
+
+## WARNING
 __Use a fast DNS__
 ```shell
 nano /etc/resolv.conf
@@ -14,8 +19,6 @@ nameserver 8.8.8.8
 ```
 With a slow DNS it takes 5 min to resolve dev stuff and build docker images, per image
 
-
-# Run the nodes in Kubernetes
 - `eval $(minikube docker-env)`
 - Node 1
     - `cd samples/node1`
@@ -40,7 +43,6 @@ With a slow DNS it takes 5 min to resolve dev stuff and build docker images, per
     - `docker push localhost:5000/disgover-sample-node3:v1`
     - `kubectl run disgover-sample-node3 --image=localhost:5000/disgover-sample-node3:v1 --port=9003 --image-pull-policy=Never`
     - `kubectl describe pod disgover-sample-node3 | grep -e IP -e Port`
-
 
 
 # Dispatch KDHT based node discovery engine
